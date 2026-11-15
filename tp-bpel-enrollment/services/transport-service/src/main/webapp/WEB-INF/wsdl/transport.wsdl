@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:tns="http://tp.bpel/transport/"
+             xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+             targetNamespace="http://tp.bpel/transport/"
+             name="TransportService">
+    <types>
+        <xsd:schema targetNamespace="http://tp.bpel/transport/">
+            <xsd:element name="activateRequest">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="studentId" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="activateResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="passId" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:schema>
+    </types>
+    <message name="activateIn">
+        <part name="payload" element="tns:activateRequest"/>
+    </message>
+    <message name="activateOut">
+        <part name="payload" element="tns:activateResponse"/>
+    </message>
+    <portType name="TransportPT">
+        <operation name="activatePass">
+            <input message="tns:activateIn"/>
+            <output message="tns:activateOut"/>
+        </operation>
+    </portType>
+    <!-- Partner link type -->
+    <plnk:partnerLinkType name="TransportLT">
+        <plnk:role name="trnProvider" portType="tns:TransportPT"/>
+    </plnk:partnerLinkType>
+    <binding name="TransportSOAP" type="tns:TransportPT">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="activatePass">
+            <soap:operation soapAction="activatePass"/>
+            <input><soap:body use="literal"/></input>
+            <output><soap:body use="literal"/></output>
+        </operation>
+    </binding>
+    <service name="TransportService">
+        <port name="TransportPort" binding="tns:TransportSOAP">
+            <soap:address location="http://localhost:8080/transport-service/TransportService"/>
+        </port>
+    </service>
+</definitions>

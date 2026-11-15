@@ -1,0 +1,80 @@
+### 1. WSDL
+GET http://localhost:8080/ode/processes/EnrollmentService?wsdl
+
+### 2. Nominal (350,000 FCFA)
+POST http://localhost:8080/ode/processes/EnrollmentService
+Content-Type: text/xml;charset=UTF-8
+SOAPAction: "enroll"
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://tp.bpel/enrollment/">
+    <soapenv:Header/>
+    <soapenv:Body>
+        <tns:enrollRequest>
+            <student>Abraham Noumsi</student>
+            <amount>350000</amount>
+        </tns:enrollRequest>
+    </soapenv:Body>
+</soapenv:Envelope>
+
+### 3. Refusal (900,000 FCFA)
+POST http://localhost:8080/ode/processes/EnrollmentService
+Content-Type: text/xml;charset=UTF-8
+SOAPAction: "enroll"
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://tp.bpel/enrollment/">
+    <soapenv:Header/>
+    <soapenv:Body>
+        <tns:enrollRequest>
+            <student>Abraham Noumsi</student>
+            <amount>900000</amount>
+        </tns:enrollRequest>
+    </soapenv:Body>
+</soapenv:Envelope>
+
+### 4. Boundary (500,000 FCFA)
+POST http://localhost:8080/ode/processes/EnrollmentService
+Content-Type: text/xml;charset=UTF-8
+SOAPAction: "enroll"
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://tp.bpel/enrollment/">
+    <soapenv:Header/>
+    <soapenv:Body>
+        <tns:enrollRequest>
+            <student>Abraham Noumsi</student>
+            <amount>500000</amount>
+        </tns:enrollRequest>
+    </soapenv:Body>
+</soapenv:Envelope>
+
+### 5. Choreography Nominal (350,000 FCFA)
+POST http://localhost:8081/api/enrollments
+Content-Type: application/json
+
+{
+  "student": "Abraham Noumsi",
+  "amount": 350000
+}
+
+### 6. Choreography Refusal (900,000 FCFA)
+POST http://localhost:8081/api/enrollments
+Content-Type: application/json
+
+{
+  "student": "Abraham Noumsi",
+  "amount": 900000
+}
+
+### 7. Processed enrollments
+GET http://localhost:8081/api/enrollments
+
+### 8. University WSDL
+GET http://localhost:8080/university-service/UniversityService?wsdl
+
+### 9. Bank WSDL
+GET http://localhost:8080/bank-service/BankService?wsdl
+
+### 10. Residence WSDL
+GET http://localhost:8080/residence-service/ResidenceService?wsdl
+
+### 11. Transport WSDL
+GET http://localhost:8080/transport-service/TransportService?wsdl

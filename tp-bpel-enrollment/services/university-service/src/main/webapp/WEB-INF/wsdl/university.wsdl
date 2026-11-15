@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:tns="http://tp.bpel/university/"
+             xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+             targetNamespace="http://tp.bpel/university/"
+             name="UniversityService">
+    <types>
+        <xsd:schema targetNamespace="http://tp.bpel/university/">
+            <xsd:element name="registerRequest">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="student" type="xsd:string" minOccurs="0"/>
+                        <xsd:element name="studentId" type="xsd:string" minOccurs="0"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="registerResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="studentId" type="xsd:string"/>
+                        <xsd:element name="status" type="xsd:string" minOccurs="0"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:schema>
+    </types>
+    <message name="registerIn">
+        <part name="payload" element="tns:registerRequest"/>
+    </message>
+    <message name="registerOut">
+        <part name="payload" element="tns:registerResponse"/>
+    </message>
+    <portType name="UniversityPT">
+        <operation name="register">
+            <input message="tns:registerIn"/>
+            <output message="tns:registerOut"/>
+        </operation>
+        <operation name="cancel">
+            <input message="tns:registerIn"/>
+        </operation>
+    </portType>
+    <!-- Partner link type -->
+    <plnk:partnerLinkType name="UniversityLT">
+        <plnk:role name="uniProvider" portType="tns:UniversityPT"/>
+    </plnk:partnerLinkType>
+    <binding name="UniversitySOAP" type="tns:UniversityPT">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="register">
+            <soap:operation soapAction="register"/>
+            <input><soap:body use="literal"/></input>
+            <output><soap:body use="literal"/></output>
+        </operation>
+        <operation name="cancel">
+            <soap:operation soapAction="cancel"/>
+            <input><soap:body use="literal"/></input>
+        </operation>
+    </binding>
+    <service name="UniversityService">
+        <port name="UniversityPort" binding="tns:UniversitySOAP">
+            <soap:address location="http://localhost:8080/university-service/UniversityService"/>
+        </port>
+    </service>
+</definitions>

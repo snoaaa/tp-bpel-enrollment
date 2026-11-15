@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:tns="http://tp.bpel/residence/"
+             xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+             targetNamespace="http://tp.bpel/residence/"
+             name="ResidenceService">
+    <types>
+        <xsd:schema targetNamespace="http://tp.bpel/residence/">
+            <xsd:element name="assignRequest">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="studentId" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="assignResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="roomNumber" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:schema>
+    </types>
+    <message name="assignIn">
+        <part name="payload" element="tns:assignRequest"/>
+    </message>
+    <message name="assignOut">
+        <part name="payload" element="tns:assignResponse"/>
+    </message>
+    <portType name="ResidencePT">
+        <operation name="assignRoom">
+            <input message="tns:assignIn"/>
+            <output message="tns:assignOut"/>
+        </operation>
+    </portType>
+    <!-- Partner link type -->
+    <plnk:partnerLinkType name="ResidenceLT">
+        <plnk:role name="resProvider" portType="tns:ResidencePT"/>
+    </plnk:partnerLinkType>
+    <binding name="ResidenceSOAP" type="tns:ResidencePT">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="assignRoom">
+            <soap:operation soapAction="assignRoom"/>
+            <input><soap:body use="literal"/></input>
+            <output><soap:body use="literal"/></output>
+        </operation>
+    </binding>
+    <service name="ResidenceService">
+        <port name="ResidencePort" binding="tns:ResidenceSOAP">
+            <soap:address location="http://localhost:8080/residence-service/ResidenceService"/>
+        </port>
+    </service>
+</definitions>
+

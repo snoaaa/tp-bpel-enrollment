@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:tns="http://tp.bpel/bank/"
+             xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+             targetNamespace="http://tp.bpel/bank/"
+             name="BankService">
+    <types>
+        <xsd:schema targetNamespace="http://tp.bpel/bank/">
+            <xsd:element name="payRequest">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="studentId" type="xsd:string"/>
+                        <xsd:element name="amount" type="xsd:decimal"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="payResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="approved" type="xsd:boolean"/>
+                        <xsd:element name="receipt" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:schema>
+    </types>
+    <message name="payIn">
+        <part name="payload" element="tns:payRequest"/>
+    </message>
+    <message name="payOut">
+        <part name="payload" element="tns:payResponse"/>
+    </message>
+    <portType name="BankPT">
+        <operation name="pay">
+            <input message="tns:payIn"/>
+            <output message="tns:payOut"/>
+        </operation>
+    </portType>
+    <!-- Partner link type -->
+    <plnk:partnerLinkType name="BankLT">
+        <plnk:role name="bankProvider" portType="tns:BankPT"/>
+    </plnk:partnerLinkType>
+    <binding name="BankSOAP" type="tns:BankPT">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="pay">
+            <soap:operation soapAction="pay"/>
+            <input><soap:body use="literal"/></input>
+            <output><soap:body use="literal"/></output>
+        </operation>
+    </binding>
+    <service name="BankService">
+        <port name="BankPort" binding="tns:BankSOAP">
+            <soap:address location="http://localhost:8080/bank-service/BankService"/>
+        </port>
+    </service>
+</definitions>
+

@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<process name="EnrollmentProcess"
+         targetNamespace="http://tp.bpel/enrollment/"
+         xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:tns="http://tp.bpel/enrollment/"
+         xmlns:uni="http://tp.bpel/university/"
+         xmlns:bnk="http://tp.bpel/bank/"
+         xmlns:res="http://tp.bpel/residence/"
+         xmlns:trn="http://tp.bpel/transport/"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <import location="EnrollmentProcess.wsdl" namespace="http://tp.bpel/enrollment/"
+            importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <import location="university.wsdl" namespace="http://tp.bpel/university/"
+            importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <import location="bank.wsdl" namespace="http://tp.bpel/bank/"
+            importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <import location="residence.wsdl" namespace="http://tp.bpel/residence/"
+            importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <import location="transport.wsdl" namespace="http://tp.bpel/transport/"
+            importType="http://schemas.xmlsoap.org/wsdl/"/>
+
+    <partnerLinks>
+        <partnerLink name="client" partnerLinkType="tns:EnrollmentLT" myRole="enrollmentProvider"/>
+        <partnerLink name="university" partnerLinkType="uni:UniversityLT" partnerRole="uniProvider"/>
+        <partnerLink name="bank" partnerLinkType="bnk:BankLT" partnerRole="bankProvider"/>
+        <partnerLink name="residence" partnerLinkType="res:ResidenceLT" partnerRole="resProvider"/>
+        <partnerLink name="transport" partnerLinkType="trn:TransportLT" partnerRole="trnProvider"/>
+    </partnerLinks>
+
+    <variables>
+        <variable name="request" messageType="tns:enrollIn"/>
+        <variable name="response" messageType="tns:enrollOut"/>
+        <variable name="uniReq" messageType="uni:registerIn"/>
+        <variable name="uniResp" messageType="uni:registerOut"/>
+        <variable name="payReq" messageType="bnk:payIn"/>
+        <variable name="payResp" messageType="bnk:payOut"/>
+        <variable name="resReq" messageType="res:assignIn"/>
+        <variable name="resResp" messageType="res:assignOut"/>
+        <variable name="trnReq" messageType="trn:activateIn"/>
+        <variable name="trnResp" messageType="trn:activateOut"/>
+    </variables>
+
+    <faultHandlers>
+        <catch faultName="tns:paymentRefused">
+            <sequence>
+                <assign>
+                    <copy>
+                        <from>
+                            <literal>
+                                <uni:registerRequest xmlns:uni="http://tp.bpel/university/" xmlns="">
+                                    <student/>
+                                    <studentId/>
+                                </uni:registerRequest>
+                            </literal>
+                        </from>
+                        <to>$uniReq.payload</to>
+                    </copy>
+                    <copy>
+                        <from>$uniResp.payload/studentId</from>
+                        <to>$uniReq.payload/studentId</to>
+                    </copy>
+                </assign>
+                <invoke partnerLink="university" portType="uni:UniversityPT" operation="cancel"
+                        inputVariable="uniReq"/>
+                <assign>
+                    <copy>
+                        <from>
+                            <literal>
+                                <tns:enrollResponse xmlns:tns="http://tp.bpel/enrollment/" xmlns="">
+                                    <studentId/>
+                                    <status/>
+                                    <roomNumber/>
+                                    <passId/>
+                                    <receipt/>
+                                </tns:enrollResponse>
+                            </literal>
+                        </from>
+                        <to>$response.payload</to>
+                    </copy>
+                    <copy>
+                        <from>$uniResp.payload/studentId</from>
+                        <to>$response.payload/studentId</to>
+                    </copy>
+                    <copy>
+                        <from>'REFUSED'</from>
+                        <to>$response.payload/status</to>
+                    </copy>
+                    <copy>
+                        <from>'NONE'</from>
+                        <to>$response.payload/roomNumber</to>
+                    </copy>
+                    <copy>
+                        <from>'NONE'</from>
+                        <to>$response.payload/passId</to>
+                    </copy>
+                    <copy>
+                        <from>'NONE'</from>
+                        <to>$response.payload/receipt</to>
+                    </copy>
+                </assign>
+                <reply partnerLink="client" portType="tns:EnrollmentPT" operation="enroll" variable="response"/>
+            </sequence>
+        </catch>
+    </faultHandlers>
+
+    <sequence>
+        <receive partnerLink="client" portType="tns:EnrollmentPT" operation="enroll"
+                 variable="request" createInstance="yes"/>
+
+        <assign>
+            <copy>
+                <from>
+                    <literal>
+                        <uni:registerRequest xmlns:uni="http://tp.bpel/university/" xmlns="">
+                            <student/>
+                            <studentId/>
+                        </uni:registerRequest>
+                    </literal>
+                </from>
+                <to>$uniReq.payload</to>
+            </copy>
+            <copy>
+                <from>$request.payload/student</from>
+                <to>$uniReq.payload/student</to>
+            </copy>
+        </assign>
+        <invoke partnerLink="university" portType="uni:UniversityPT" operation="register"
+                inputVariable="uniReq" outputVariable="uniResp"/>
+
+        <assign>
+            <copy>
+                <from>
+                    <literal>
+                        <bnk:payRequest xmlns:bnk="http://tp.bpel/bank/" xmlns="">
+                            <studentId/>
+                            <amount/>
+                        </bnk:payRequest>
+                    </literal>
+                </from>
+                <to>$payReq.payload</to>
+            </copy>
+            <copy>
+                <from>$uniResp.payload/studentId</from>
+                <to>$payReq.payload/studentId</to>
+            </copy>
+            <copy>
+                <from>$request.payload/amount</from>
+                <to>$payReq.payload/amount</to>
+            </copy>
+        </assign>
+        <invoke partnerLink="bank" portType="bnk:BankPT" operation="pay"
+                inputVariable="payReq" outputVariable="payResp"/>
+
+        <if>
+            <condition>$payResp.payload/approved = 'true'</condition>
+            <flow>
+                <sequence>
+                    <assign>
+                        <copy>
+                            <from>
+                                <literal>
+                                    <res:assignRequest xmlns:res="http://tp.bpel/residence/" xmlns="">
+                                        <studentId/>
+                                    </res:assignRequest>
+                                </literal>
+                            </from>
+                            <to>$resReq.payload</to>
+                        </copy>
+                        <copy>
+                            <from>$uniResp.payload/studentId</from>
+                            <to>$resReq.payload/studentId</to>
+                        </copy>
+                    </assign>
+                    <invoke partnerLink="residence" portType="res:ResidencePT" operation="assignRoom"
+                            inputVariable="resReq" outputVariable="resResp"/>
+                </sequence>
+                <sequence>
+                    <assign>
+                        <copy>
+                            <from>
+                                <literal>
+                                    <trn:activateRequest xmlns:trn="http://tp.bpel/transport/" xmlns="">
+                                        <studentId/>
+                                    </trn:activateRequest>
+                                </literal>
+                            </from>
+                            <to>$trnReq.payload</to>
+                        </copy>
+                        <copy>
+                            <from>$uniResp.payload/studentId</from>
+                            <to>$trnReq.payload/studentId</to>
+                        </copy>
+                    </assign>
+                    <invoke partnerLink="transport" portType="trn:TransportPT" operation="activatePass"
+                            inputVariable="trnReq" outputVariable="trnResp"/>
+                </sequence>
+            </flow>
+            <else>
+                <throw faultName="tns:paymentRefused"/>
+            </else>
+        </if>
+
+        <assign>
+            <copy>
+                <from>
+                    <literal>
+                        <tns:enrollResponse xmlns:tns="http://tp.bpel/enrollment/" xmlns="">
+                            <studentId/>
+                            <status/>
+                            <roomNumber/>
+                            <passId/>
+                            <receipt/>
+                        </tns:enrollResponse>
+                    </literal>
+                </from>
+                <to>$response.payload</to>
+            </copy>
+            <copy>
+                <from>$uniResp.payload/studentId</from>
+                <to>$response.payload/studentId</to>
+            </copy>
+            <copy>
+                <from>'ENROLLED'</from>
+                <to>$response.payload/status</to>
+            </copy>
+            <copy>
+                <from>$resResp.payload/roomNumber</from>
+                <to>$response.payload/roomNumber</to>
+            </copy>
+            <copy>
+                <from>$trnResp.payload/passId</from>
+                <to>$response.payload/passId</to>
+            </copy>
+            <copy>
+                <from>$payResp.payload/receipt</from>
+                <to>$response.payload/receipt</to>
+            </copy>
+        </assign>
+        <reply partnerLink="client" portType="tns:EnrollmentPT" operation="enroll" variable="response"/>
+    </sequence>
+</process>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:tns="http://tp.bpel/enrollment/"
+             xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+             targetNamespace="http://tp.bpel/enrollment/"
+             name="EnrollmentProcessService">
+
+    <types>
+        <xsd:schema targetNamespace="http://tp.bpel/enrollment/">
+            <xsd:import namespace="http://tp.bpel/enrollment/" schemaLocation="types/enrollment.xsd"/>
+        </xsd:schema>
+    </types>
+
+    <message name="enrollIn">
+        <part name="payload" element="tns:enrollRequest"/>
+    </message>
+    <message name="enrollOut">
+        <part name="payload" element="tns:enrollResponse"/>
+    </message>
+
+    <portType name="EnrollmentPT">
+        <operation name="enroll">
+            <input message="tns:enrollIn"/>
+            <output message="tns:enrollOut"/>
+        </operation>
+    </portType>
+
+    <plnk:partnerLinkType name="EnrollmentLT">
+        <plnk:role name="enrollmentProvider" portType="tns:EnrollmentPT"/>
+    </plnk:partnerLinkType>
+
+    <binding name="EnrollmentSOAP" type="tns:EnrollmentPT">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="enroll">
+            <soap:operation soapAction="enroll"/>
+            <input><soap:body use="literal"/></input>
+            <output><soap:body use="literal"/></output>
+        </operation>
+    </binding>
+
+    <service name="EnrollmentService">
+        <port name="EnrollmentPort" binding="tns:EnrollmentSOAP">
+            <soap:address location="http://localhost:8080/ode/processes/EnrollmentService"/>
+        </port>
+    </service>
+</definitions>
+

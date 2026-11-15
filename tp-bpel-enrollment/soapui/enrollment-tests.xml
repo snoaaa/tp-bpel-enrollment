@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:soapui-project id="c74a1f50-e854-4a29-b68e-e931fae29853" activeEnvironment="Default" name="TP4_BPEL_Enrollment_Tests" resourceRoot="" soapui-version="5.7.0" abortOnError="false" runType="SEQUENTIAL" xmlns:con="http://eviware.com/soapui/config">
+    <con:settings/>
+    <con:interface xsi:type="con:WsdlInterface" id="a35bd18f-bc58-45ad-bb52-e9e99a2245b0" wsaVersion="NONE" name="EnrollmentSOAP" type="wsdl" bindingOperationName="enroll" soapVersion="1_1" anonymous="optional" definition="http://localhost:8080/ode/processes/EnrollmentService?wsdl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <con:settings/>
+        <con:definitionCache type="TEXT" rootPart="http://localhost:8080/ode/processes/EnrollmentService?wsdl">
+            <con:part>
+                <con:url>http://localhost:8080/ode/processes/EnrollmentService?wsdl</con:url>
+                <con:content><![CDATA[<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://tp.bpel/enrollment/" targetNamespace="http://tp.bpel/enrollment/">
+  <wsdl:types>
+    <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://tp.bpel/enrollment/" elementFormDefault="qualified">
+      <xs:element name="enrollRequest">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="student" type="xs:string"/>
+            <xs:element name="amount" type="xs:decimal"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="enrollResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="studentId" type="xs:string" minOccurs="0"/>
+            <xs:element name="status" type="xs:string" minOccurs="0"/>
+            <xs:element name="roomNumber" type="xs:string" minOccurs="0"/>
+            <xs:element name="passId" type="xs:string" minOccurs="0"/>
+            <xs:element name="receipt" type="xs:string" minOccurs="0"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:schema>
+  </wsdl:types>
+  <wsdl:message name="enrollIn">
+    <wsdl:part name="payload" element="tns:enrollRequest"/>
+  </wsdl:message>
+  <wsdl:message name="enrollOut">
+    <wsdl:part name="payload" element="tns:enrollResponse"/>
+  </wsdl:message>
+  <wsdl:portType name="EnrollmentServicePortType">
+    <wsdl:operation name="enroll">
+      <wsdl:input message="tns:enrollIn"/>
+      <wsdl:output message="tns:enrollOut"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="EnrollmentSOAP" type="tns:EnrollmentServicePortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="enroll">
+      <soap:operation soapAction="enroll"/>
+      <wsdl:input><soap:body use="literal"/></wsdl:input>
+      <wsdl:output><soap:body use="literal"/></wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="EnrollmentService">
+    <wsdl:port name="EnrollmentPort" binding="tns:EnrollmentSOAP">
+      <soap:address location="http://localhost:8080/ode/processes/EnrollmentService"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>]]></con:content>
+                <con:type>http://schemas.xmlsoap.org/wsdl/</con:type>
+            </con:part>
+        </con:definitionCache>
+        <con:endpoints>
+            <con:endpoint>http://localhost:8080/ode/processes/EnrollmentService</con:endpoint>
+        </con:endpoints>
+        <con:operation id="9323f958-305b-4394-bb97-2bb80bdfba4e" isOneWay="false" action="enroll" name="enroll" bindingOperationName="enroll" type="Request-Response" inputName="" receivesAttachments="false" sendsAttachments="false" anonymous="optional">
+            <con:settings/>
+            <con:call id="f49b57b9-1f0c-4395-b9e7-5e927ef0d56c" name="Default_Enroll_Request">
+                <con:settings/>
+                <con:encoding>UTF-8</con:encoding>
+                <con:endpoint>http://localhost:8080/ode/processes/EnrollmentService</con:endpoint>
+                <con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:enr="http://tp.bpel/enrollment/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <enr:enrollRequest>
+         <student>Alice</student>
+         <amount>350000</amount>
+      </enr:enrollRequest>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request>
+                <con:credentials><con:authType>No Authorization</con:authType></con:credentials>
+                <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+                <con:wsaConfig action="enroll"/>
+            </con:call>
+        </con:operation>
+    </con:interface>
+
+    <con:testSuite id="297ba5a5-e3d6-4e58-9a67-5d3369fba7c4" name="EnrollmentTestSuite">
+        <con:settings/>
+        <con:runType>SEQUENTIAL</con:runType>
+
+        <!-- TEST CASE 1: Nominal Flow (amount <= 500,000 FCFA) -->
+        <con:testCase id="tc-01-nominal" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="TC01_Nominal_Enrollment_350k" searchProperties="true">
+            <con:description>Nominal test: amount = 350,000 FCFA. Verifies registration, approved bank payment, parallel room allocation, and transit pass activation, returning status ENROLLED.</con:description>
+            <con:settings/>
+            <con:testStep type="request" id="ts-01-step" name="SOAP_Request_Nominal">
+                <con:settings/>
+                <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                    <con:interface>EnrollmentSOAP</con:interface>
+                    <con:operation>enroll</con:operation>
+                    <con:request name="SOAP_Request_Nominal" id="req-01">
+                        <con:settings/>
+                        <con:encoding>UTF-8</con:encoding>
+                        <con:endpoint>http://localhost:8080/ode/processes/EnrollmentService</con:endpoint>
+                        <con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:enr="http://tp.bpel/enrollment/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <enr:enrollRequest>
+         <student>Alice</student>
+         <amount>350000</amount>
+      </enr:enrollRequest>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request>
+                        <con:assertion type="SOAP Response" id="soap-res-1" name="SOAP Response Valid"/>
+                        <con:assertion type="XPath Match" id="xpath-status-1" name="Check Status is ENROLLED">
+                            <con:configuration>
+                                <path>//*[local-name()='status']/text()</path>
+                                <content>ENROLLED</content>
+                                <allowWildcards>false</allowWildcards>
+                                <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+                                <ignoreComments>false</ignoreComments>
+                            </con:configuration>
+                        </con:assertion>
+                        <con:assertion type="XPath Match" id="xpath-room-1" name="Check Room Allocated">
+                            <con:configuration>
+                                <path>starts-with(//*[local-name()='roomNumber']/text(), 'ROOM-')</path>
+                                <content>true</content>
+                                <allowWildcards>false</allowWildcards>
+                                <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+                                <ignoreComments>false</ignoreComments>
+                            </con:configuration>
+                        </con:assertion>
+                        <con:assertion type="XPath Match" id="xpath-pass-1" name="Check Transit Pass Activated">
+                            <con:configuration>
+                                <path>starts-with(//*[local-name()='passId']/text(), 'PASS-')</path>
+                                <content>true</content>
+                                <allowWildcards>false</allowWildcards>
+                                <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+                                <ignoreComments>false</ignoreComments>
+                            </con:configuration>
+                        </con:assertion>
+                        <con:assertion type="XPath Match" id="xpath-receipt-1" name="Check Bank Receipt Issued">
+                            <con:configuration>
+                                <path>starts-with(//*[local-name()='receipt']/text(), 'RCT-')</path>
+                                <content>true</content>
+                                <allowWildcards>false</allowWildcards>
+                                <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+                                <ignoreComments>false</ignoreComments>
+                            </con:configuration>
+                        </con:assertion>
+                        <con:credentials><con:authType>No Authorization</con:authType></con:credentials>
+                        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+                        <con:wsaConfig action="enroll"/>
+                    </con:request>
+                </con:config>
+            </con:testStep>
+        </con:testCase>
+
+        <!-- TEST CASE 2: Refusal Flow (amount > 500,000 FCFA) with Compensation -->
+        <con:testCase id="tc-02-refusal" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="TC02_Refusal_And_Compensation_900k" searchProperties="true">
+            <con:description>Refusal test: amount = 900,000 FCFA (> 500,000 FCFA). Bank declines payment, triggering compensation handler to roll back student registration at University. Returns status REFUSED.</con:description>
+            <con:settings/>
+            <con:testStep type="request" id="ts-02-step" name="SOAP_Request_Refusal">
+                <con:settings/>
+                <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                    <con:interface>EnrollmentSOAP</con:interface>
+                    <con:operation>enroll</con:operation>
+                    <con:request name="SOAP_Request_Refusal" id="req-02">
+                        <con:settings/>
+                        <con:encoding>UTF-8</con:encoding>
+                        <con:endpoint>http://localhost:8080/ode/processes/EnrollmentService</con:endpoint>
+                        <con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:enr="http://tp.bpel/enrollment/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <enr:enrollRequest>
+         <student>Bob</student>
+         <amount>900000</amount>
+      </enr:enrollRequest>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request>
+                        <con:assertion type="SOAP Response" id="soap-res-2" name="SOAP Response Valid"/>
+                        <con:assertion type="XPath Match" id="xpath-status-2" name="Check Status is REFUSED">
+                            <con:configuration>
+                                <path>//*[local-name()='status']/text()</path>
+                                <content>REFUSED</content>
+                                <allowWildcards>false</allowWildcards>
+                                <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+                                <ignoreComments>false</ignoreComments>
+                            </con:configuration>
+                        </con:assertion>
+                        <con:assertion type="XPath Match" id="xpath-room-2" name="Check Room is NONE">
+                            <con:configuration>
+                                <path>//*[local-name()='roomNumber']/text()</path>
+                                <content>NONE</content>
+                                <allowWildcards>false</allowWildcards>
+                                <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+                                <ignoreComments>false</ignoreComments>
+                            </con:configuration>
+                        </con:assertion>
+                        <con:credentials><con:authType>No Authorization</con:authType></con:credentials>
+                        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+                        <con:wsaConfig action="enroll"/>
+                    </con:request>
+                </con:config>
+            </con:testStep>
+        </con:testCase>
+
+        <!-- TEST CASE 3: Boundary Value Test (amount == 500,000 FCFA exactly) -->
+        <con:testCase id="tc-03-boundary" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="TC03_Boundary_Threshold_500k" searchProperties="true">
+            <con:description>Boundary value test: amount = 500,000 FCFA (exact ceiling condition amount &lt;= 500,000). Verifies payment is approved at boundary threshold.</con:description>
+            <con:settings/>
+            <con:testStep type="request" id="ts-03-step" name="SOAP_Request_Boundary">
+                <con:settings/>
+                <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                    <con:interface>EnrollmentSOAP</con:interface>
+                    <con:operation>enroll</con:operation>
+                    <con:request name="SOAP_Request_Boundary" id="req-03">
+                        <con:settings/>
+                        <con:encoding>UTF-8</con:encoding>
+                        <con:endpoint>http://localhost:8080/ode/processes/EnrollmentService</con:endpoint>
+                        <con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:enr="http://tp.bpel/enrollment/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <enr:enrollRequest>
+         <student>Charlie</student>
+         <amount>500000</amount>
+      </enr:enrollRequest>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request>
+                        <con:assertion type="SOAP Response" id="soap-res-3" name="SOAP Response Valid"/>
+                        <con:assertion type="XPath Match" id="xpath-status-3" name="Check Status is ENROLLED at Threshold">
+                            <con:configuration>
+                                <path>//*[local-name()='status']/text()</path>
+                                <content>ENROLLED</content>
+                                <allowWildcards>false</allowWildcards>
+                                <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+                                <ignoreComments>false</ignoreComments>
+                            </con:configuration>
+                        </con:assertion>
+                        <con:credentials><con:authType>No Authorization</con:authType></con:credentials>
+                        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+                        <con:wsaConfig action="enroll"/>
+                    </con:request>
+                </con:config>
+            </con:testStep>
+        </con:testCase>
+
+        <!-- TEST CASE 4: Small Amount Nominal Test (100,000 FCFA) -->
+        <con:testCase id="tc-04-minimal" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="TC04_Minimal_Amount_100k" searchProperties="true">
+            <con:description>Minimal amount test: amount = 100,000 FCFA. Verifies correct end-to-end processing for scholarship / reduced tuition enrollment.</con:description>
+            <con:settings/>
+            <con:testStep type="request" id="ts-04-step" name="SOAP_Request_Minimal">
+                <con:settings/>
+                <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                    <con:interface>EnrollmentSOAP</con:interface>
+                    <con:operation>enroll</con:operation>
+                    <con:request name="SOAP_Request_Minimal" id="req-04">
+                        <con:settings/>
+                        <con:encoding>UTF-8</con:encoding>
+                        <con:endpoint>http://localhost:8080/ode/processes/EnrollmentService</con:endpoint>
+                        <con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:enr="http://tp.bpel/enrollment/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <enr:enrollRequest>
+         <student>David</student>
+         <amount>100000</amount>
+      </enr:enrollRequest>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request>
+                        <con:assertion type="SOAP Response" id="soap-res-4" name="SOAP Response Valid"/>
+                        <con:assertion type="XPath Match" id="xpath-status-4" name="Check Status is ENROLLED">
+                            <con:configuration>
+                                <path>//*[local-name()='status']/text()</path>
+                                <content>ENROLLED</content>
+                                <allowWildcards>false</allowWildcards>
+                                <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+                                <ignoreComments>false</ignoreComments>
+                            </con:configuration>
+                        </con:assertion>
+                        <con:credentials><con:authType>No Authorization</con:authType></con:credentials>
+                        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+                        <con:wsaConfig action="enroll"/>
+                    </con:request>
+                </con:config>
+            </con:testStep>
+        </con:testCase>
+    </con:testSuite>
+    <con:properties/>
+    <con:wssContainer/>
+    <con:oAuth2ProfileContainer/>
+</con:soapui-project>
